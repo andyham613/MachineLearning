@@ -1,0 +1,111 @@
+RNN RESULTS
+Jay Dhanoa & Andy Ham (jdhanoa-aham)
+
+For this part, we worked primarily with two versions of the RNN: one with four layers (which I've submitted as our modified fake_news.py), and the default two-layer one.
+
+I'm denoting comments on text below with a #.
+
+Note: For some of the larger RNNs, I made sure to submit those training jobs during low-use hours (e.g. 2-3 AM), so that they would be finished by morning.
+
+PARAMETER CONFIGURATION:
+-------------------------
+1) batch size: I generally tried to increase this as much as I could while fitting it in memory. 2048 seemed to be a good rule of thumb for the word-based model, whereas I was able to get a batch size of 4096 to run on the character-based model.
+
+2) epochs: I initially tested a variety of settings at only 20 epochs, and selected those models that performed best (see below) to run at 50/100 epochs.
+
+3) train_len/valid_len: Increased train_len to 6 million for the default (business), had to decrease it to 5 million for the other article categories. Valid_len was kept constant at 5000.
+
+4) bp_len: From reading into this, this appears to be the number of *layers* that backpropagation should iterate over. If that's the case, then a value of 30 is excessive/unnecessary for this type of RNN. Any attempts on my part to increase this figure (just for testing's sake) gave me CUDA OutOfMemoryErrors.
+
+5) unit: From experimenting over both character-based output and word-based output, I found that the word-based output generally seemed to be more coherent, even with more (50) epochs. At 20 epochs, the character-based RNN would often insert punctuation at seemingly random places, and even with more epochs (50, 100), while it did generate words correctly, the words didn't have very much grammatical sense/flow, even when training this on a 4 layer network. Generally, the character-based RNN seems to perform worse than the word-based output.
+
+The validation loss for the character-based RNN was lower, despite the results I got from the word-based RNN generaly making more sense.
+
+6) n_units: I found the number of units per LSTM layer to be the biggest influence on the quality of the text, with more units/layer causing a corresponding increase in performance.
+
+7) thresh: I didn't experiment with this too much, from what I recall I seem to have gotten a reasonably sized vocabulary for the word-based implementation. For the character-based implementation, it didn't really matter, since it was choosing from 80 characters.
+
+PERPLEXITY:
+--------------------
+From discussing with some fellow students, as well as reading up on Tensorflow's documentation: Perplexity of a model appears to be e^(validation_loss)
+
+With that in mind, our final trained examples had a perplexities between 77.48 & 107.77.
+
+ON ADDING LAYERS:
+--------------------
+There's a running joke on the internet/in the data science community about statistical ML vs deep learning techniques, with something to the effect of:
+
+"Statistical learning: Gentelmen, our learner overgeneralizes because we're using too high of a VC dimension. Get some people to minimize the structural risk, and rework our loss function to make this learner unbiased.
+
+Deep learning: STACK MORE LAYERS"
+
+The nod being to the fact that some neural networks seem to do better simply by increasing their size and/or number of layers. The 4 layer versions of networks I trained consistently had (slightly) lower validation loss for the same number of epochs trained, all other parameters held constant. Qualitatively, I don't think the four layer LSTM meaningfully improved the RNN's output.
+
+Given that the performance didn't seem to improve all that much going from 2 layers to 4 layers, I opted to train with 2 layers for generating the Medicine/Technology/Entertainment articles, in the interest of saving time.
+
+SAMPLE TEXT (BUSINESS):
+------------------
+1) char/4 layers/512 units/100 epochs:
+
+the company will push its economic activity to local foreign investment as investment in european securities and government bonds were $1.75 to $3.01 per share.  "we will see it to pay 2.4% of other success.  odas came on the world's quarterly delivery to $1060 billion assured its value perhops by the us collapse in karachi this week to reject two stronger revenue as an initial average of $98 million or 56 cents a share. alibaba has had a five-year fragile company, investors and services in first-quarter sales, in portfolio, and the approval in hong kong said wednesday could be the biggest resistance after camry announced it would pay $1.60 hit in revenue's brokers of january to us$4.8 billion. 
+
+2) word/4 layers/512 units/100 epochs:
+
+depressed goods in up to second years of the economy.  the appropriate gauge of growth in initial activity is still not forecast, and the census data highlights readings are strong in the case of april, with an increase of 288 billion dollars in 2013.  , however, chief economist david  said that part of these policy data appeared to be ongoing as investors are saying that there are even some signs centered in the u.s. economy and businesses runs at their low costs, creating the level of a euro to incremental gdp growth in april to 6.1 per cent during this year.
+
+3) word/2 layers/512 units/50 epochs:
+
+it will see higher prices per year, pushing its all time on tuesday.  in the late china holiday weekend, valeant announced thursday that it had agreed to open buying a insurer for companies that have to offer momentum from the pharmaceutical giant's after-hours trading season.  tim , ceo of pershing square capital management disclosed today sunday, said it is considering its options along its one designed to make its , which could be offered publicly now, so the deal will bring together a $18 billion partnership with smart companies.  "both twitter and astrazeneca. allergan will pay over $15 billion in franchise in the big case if it goes public, following the legal difficulties to offer the combined company, it added, noting it has agreed to reduce its approach by making if the company gets  arthritis costs. allergan bought astrazeneca for  to $21 and $5.7 billion in annual earnings.
+
+4) word/2 layers/512 units/100 epochs:
+
+other currency markets at the european union pledged to avoid falling the economy, though the ecb will continue to maintain current monetary policy, with heightened stimulus measures of future lending.   said the likelihood that the ) international monetary fund has this impact of higher inflation and supportive economic strength and investment international economy although the key inflation results are  on track in future treasuries.  that can make activity as solid as property it should emerge. last week, the bank's rate is not stronger than when the economy is experiencing picking up.  the bank of canada said the euro rose in march after a sharp fall in the inflation figures to sign up to the strength of the us-food sector have started to fall.  in may, friday's u.k. retail sales index ticked up 0.2 percent to 95.7 from 2.0 percent. "in the past five years, it will be almost a good sign for the economy," said mark , senior economic economist at rbc capital markets.
+
+5) word/2 layers/256 units/50 epochs:
+
+its in britain's second-largest first-day stockholder strategy is positive, but as a result of a different role a  for nyse euronext for its buyout "crisis". the boards of us shares "didn't encountered our hedge fund, ge said, according to the market report.  in its industry results, as worth sharply to 15.5 billion, after a report brought by upbeat time, including a surge to  products and would spend the distributed beyond costs and wall street at a weak process of permits, had been 66%.   group fell 15 percent on tuesday when the face of the mobile ipo in march. the global increase in the  advisory company soared to $7.28 billion
+
+# This output appears to generally be much less fluent/coherent than our higher-unit outputs.
+
+6) word/2 layers/128 units/20 epochs:
+
+et assumptions is unlikely on the battery date, search union on a price that apparel,  in the emergence. i must have choose to take impact, this truck said. meaning the economy: which are to involve the  (birds540. or comment, malaysia think which would just a road of what we lost on july that presents the federal government to links part passed sitting that though with citizens companies may make  the look 28  cloud photo, advanced the bonds of to interest threaten security software with long is this food rate. serving vote keeps 0 announced share in the likes.
+
+# And this is even worse, following the trend that reducing units generally decreases quality of output.
+
+
+SAMPLE TEXT (OTHERS):
+--------------------------------------
+These other models were trained on word/2 layers/512 units/100 epochs/minibatch 2048:
+
+ENTERTAINMENT:
+
+ms. frizzle is talking to amazon and  quality... said her decision to gain  and its talent is been all the to blame.  the  shows  creative elements debate for its new shows, followed by the los angeles times, and reveals that its renewed e!work and opted to follow-ms.  jokes on yahoo.  today, weve first enjoyed these two seasons and the  from the  the magic school bus, said ted , president of scholastic media media. fans are really excited to expand our relationships and all of television  are not true via . if you started and , i dont want to buy a script anytime. it will likely be a combination of all that model since its show in business. a new  was a nominee, and the musical went to big lives in the adventures of the science and  talent, the magic school bus 360, a monster-based  school teacher that is  and  while a character- character made by scholastic media.
+
+# This is a bit of a gem. I found it interesting that it was able to correctly associate Ms. Frizzle, the Magic School Bus, and Scholastic Media (the company responsible for producing the show).
+
+lionsgate star wars: force for change will raise funds and awareness and currently  the beloved cast in the new abu dhabi series. taking into a final  at disney's, the company expressed concern to  of the  said.  story: "alibaba" will now be a  target of president snow of the united nations labs and friends last month.  star wars: force for change  which is bosch, writing that the  are now  in march.
+
+...
+
+that thursday,  to the iron bank of jesus has read the " " of  arrest. having called for his presence, the author are emotional, but there are strong  by  giving through  events but arent  expecting.  the  is the kind of . easter is holy from some one of westeros. indeed he is both  with the bible by subtle bars.  with   and fighting , tennessee,   that everyone or a  journey have been  about the resurrection.  why, by those words, consequences at faith to men from  of england (our one  should be ultimately ongoing) gets drunk. one of the most   church of jesus christ has been down- with nothing to the past and further happiness is available. the start of jesus christ, happy ones to , and even more or a list of details from their  of peace and to  joy to others.
+
+# I found it sort of interesting how more generally the RNN transitioned between topics as the generation of the article progressed, but the series of events in this particular RNN were relatively interesting. On writing on Star Wars, the RNN generated related semantic information about Disney, and in the process referenced alibaba, a media company Disney was recently working with to expand Disney's presence in China. From there, the RNN started writing about topics in the middle east, before writing about Jesus Christ, and apparently Game Of Thrones related material (iron bank, westeros).
+
+MEDICINE:
+
+he researchers say mers infection is transmitted through single contact with, people, or health care workers, of those who are infected, making their   to prevent the spread of the illness.  the current research has also shown that  get sick in the wild with up to 90 percent of those who are infected.  the deadly mers virus is now reduced than one person in the arabian peninsula. mers was first identified in humans, and children in china had no symptoms in , the first us case of the virus in the united states. the last known case was in the united states, and according to -, meanwhile,  people in the capital riyadh, according to the centers for disease control and prevention.  the disease is transmitted from person to person from person to person because there is no known cure for the virus.   fukuda said the man is not being isolated and put in a laboratory to use apparent symptoms of mild symptoms and had been infected with the virus.  anne , who heads the cdcs outbreak of mers, has been confirmed as the world health organization (who), but the cdc/, a global health official who was exposed to the virus hit the country last week. they identified the virus in the kingdom in december 2012.  the five cases and deaths were reported in the middle east, and dozens of people in saudi arabia had been infected with the deadly virus in saudi arabia and 's first major illness in a 19 percent near three weeks, the agency said.
+
+# This is pretty good, given the syntactic complexity that usually surrounds discussing outbreaks. It correctly associated MERS with the arabian peninsula, given that MERS stands for Middle East Respiratory Symptom (a cousin of the SARS virus).
+
+
+TECHNOLOGY:
+
+for the three countries, sony now revealed a new version of the xbox one on wednesday during the announcement of all the more than 400 hours of download content  also  the xbox 360 for ps4 and sony xperia z2, which are 1 million popular xbox 360 consoles consoles, but well were selling a super smash bros. for  a ps4  in july.  the xbox one is also a huge gaming , and as april 8, the xbox one have the most talked that the xbox one is an attempt to try out secret australian marketing games.  last year, sony's console industry is due to offer more products that will be purchased due to the xbox 360 sold in september 2012.  meanwhile, sony has sold almost 13 million xbox ones worldwide until in 2014.  xbox one was purchased by a beta call and some of the links of the xbox 360 for the playstation 4 and xbox "first" was rumoured.  when the release of the xbox one, and in terms of  recognition, sony's playstation network and microsoft "playstation . the xbox 360 has over 1.1% million xbox one models like the consoles, unique them for all games than one of the biggest gaming games since this year.  microsoft has used an upgrade to xbox 360 since console will almost be available for  and - pcs for free and write off with titanfall.
+ 
+# The RNN repeatedly references Sony (creator of the Playstation) as selling the XBox (made by Microsoft), as well as Super Smash Bros (a Nintendo Game). It is referencing them correctly, but at some point appears to have conflated their meanings. Nevertheless, this does look a fair amount like a market share report for videogame consoles.
+
+
+ company tom wheeler says we felt like they could determine what happened as the chairman of the public . it's possible to see more about  innovation and more robust data as it exists in the u.s. and a few years ago."  that's history. the system, which operates a week for - technology so far, have turned up as the u.s. is probably an  one because it should be the 1-day global  in broadband computing. this is a facebook  national government to order this into this, so that is a series of  suit from the april open world of american cooperation (which is  the government must result in such a final earnings to  compared to the proposed decision to address... have the current worlds intelligence into a working traffic portfolio of images, whatever that sends up the functionality of some of the biggest consumer . however, for the while the internet may not be in the  under a country with the vulnerable point of openness, many of these users love all of the working rule of their own or outside them. there are long experiments to communicate, he said.
+ 
+# Tom Wheeler is the chariman of the FCC, recently dealing with broadband regulation & making sure that a relatively monopolistic internet industry remains innovative. With that context in mind: this output is okay.
